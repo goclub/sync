@@ -10,9 +10,7 @@ func main () {
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		wg := sync.WaitGroup{}
 		wg.Add(1)
-		/* <- 新增代码 */
-		var recoverValue interface{}
-		/* -> */
+		/* 新增代码 */ var recoverValue interface{}
 		go func() {
 			defer wg.Done()
 			/* <- 新增代码 */
@@ -32,7 +30,7 @@ func main () {
 		/* <- 新增代码 */
 		if recoverValue != nil {
 			log.Print(recoverValue)
-			writer.WriteHeader(500)
+			writer.WriteHeader(500) ; return
 		}
 		/* -> */
 		_, err := writer.Write([]byte("ok")) ; if err != nil {
@@ -40,7 +38,7 @@ func main () {
 			writer.WriteHeader(500)
 		}
 	})
-	addr := ":4001"
+	addr := ":4002"
 	log.Print("访问 http://127.0.0.1" + addr)
 	log.Print("然后访问 http://127.0.0.1" + addr + "/?name=nimoc")
 	log.Print("接着访问 http://127.0.0.1" + addr)

@@ -29,6 +29,6 @@ func main () {
 	log.Print("访问 http://127.0.0.1" + addr)
 	log.Print("然后访问 http://127.0.0.1" + addr + "/?name=nimoc")
 	log.Print("接着访问 http://127.0.0.1" + addr)
-	log.Print("会发现第三次访问时服务已经中断了（不在 routine 中的 panic 不会导致服务中断，因为go http 标准库做出defer处理）")
+	log.Print("会发现第三次访问时服务已经中断了")
 	log.Print(http.ListenAndServe(addr, nil))
 }

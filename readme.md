@@ -39,7 +39,7 @@ func main () {
 	log.Print("访问 http://127.0.0.1" + addr)
 	log.Print("然后访问 http://127.0.0.1" + addr + "/?name=nimoc")
 	log.Print("接着访问 http://127.0.0.1" + addr)
-	log.Print("会发现第三次访问时服务已经中断了（不在 routine 中的 panic 不会导致服务中断，因为go http 标准库做出defer处理）")
+	log.Print("会发现第三次访问时服务已经中断了")
 	log.Print(http.ListenAndServe(addr, nil))
 }
 
@@ -63,9 +63,7 @@ func main () {
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		wg := sync.WaitGroup{}
 		wg.Add(1)
-		/* <- 新增代码 */
-		var recoverValue interface{}
-		/* -> */
+		/* 新增代码 */ var recoverValue interface{}
 		go func() {
 			defer wg.Done()
 			/* <- 新增代码 */
@@ -85,7 +83,7 @@ func main () {
 		/* <- 新增代码 */
 		if recoverValue != nil {
 			log.Print(recoverValue)
-			writer.WriteHeader(500)
+			writer.WriteHeader(500) ; return
 		}
 		/* -> */
 		_, err := writer.Write([]byte("ok")) ; if err != nil {
@@ -93,7 +91,7 @@ func main () {
 			writer.WriteHeader(500)
 		}
 	})
-	addr := ":4001"
+	addr := ":4002"
 	log.Print("访问 http://127.0.0.1" + addr)
 	log.Print("然后访问 http://127.0.0.1" + addr + "/?name=nimoc")
 	log.Print("接着访问 http://127.0.0.1" + addr)
@@ -139,7 +137,7 @@ func main () {
 			writer.WriteHeader(500); return
 		}
 	})
-	addr := ":4001"
+	addr := ":4003"
 	log.Print("访问 http://127.0.0.1" + addr)
 	log.Print("然后访问 http://127.0.0.1" + addr + "/?name=nimoc")
 	log.Print("接着访问 http://127.0.0.1" + addr)
