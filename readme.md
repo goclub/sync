@@ -6,7 +6,7 @@
 
 ## 不安全的 routine
 
-[unsafe_routine](./examples/unsafe_routine/main.go)
+[unsafe_routine](examples/internal/unsafe_routine/main.go)
 ```.go
 package main
 
@@ -49,7 +49,7 @@ func main () {
 
 ## 通过 defer recover 防止服务中断
 
-[recover_routine](./examples/recover_routine/main.go)
+[recover_routine](examples/internal/recover_routine/main.go)
 ```.go
 package main
 
@@ -103,7 +103,7 @@ func main () {
 
 ## 使用 xsync.Routine{}.Go() 防止服务中断 
 
-[safe_routine](./examples/safe_routine/main.go)
+[safe_routine](examples/internal/safe_routine/main.go)
 ```.go
 package main
 

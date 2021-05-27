@@ -9,7 +9,7 @@ type Routine struct {
 	err error
 	recoverValue interface{}
 }
-func (r *Routine) Go(routine func() error) {
+func (r *Routine) Go(routine func() (err error)) {
 	r.wg.Add(1)
 	go func() {
 		defer r.wg.Done()
