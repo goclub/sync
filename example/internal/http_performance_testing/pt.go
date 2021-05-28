@@ -34,10 +34,13 @@ func (pt PT) Run(t *testing.T, opt RunOpt) (err error) {
 	if pt.client == nil {
 		pt.client = &http.Client{}
 	}
-	routine := xsync.Routine{}
 	ticker := time.NewTicker(opt.Interval)
+	wg := sync.WaitGroup{}
+	errRecoverCh := make(chan xsync.ErrorRecover)
+	wg.Add(1)
 	// 开启 routine 处理 <-ticker.C
-	routine.Go(func() error {
+	xsync.Go(errRecoverCh, func() error {
+		defer wg.Done()
 		// 使用 for 配合 <-ticker.C 堵塞运行，直到从 ticker.C 接收到值
 		for {
 			<-ticker.C
@@ -50,7 +53,9 @@ func (pt PT) Run(t *testing.T, opt RunOpt) (err error) {
 				break
 			}
 			// 开启 routine 异步发送请求，不同步等待请求响应
-			routine.Go(func() (err error) {
+			wg.Add(1)
+			xsync.Go(errRecoverCh, func() (err error) {
+				defer wg.Done()
 				steps, err := pt.Steps() ; if err != nil {
 				    return err
 				}
@@ -69,10 +74,15 @@ func (pt PT) Run(t *testing.T, opt RunOpt) (err error) {
 		}
 		return nil
 	})
-	err , recoverValue := routine.Wait() ; if err != nil {
-	    return
-	} ; if recoverValue != nil {
-	    return fmt.Errorf("go routine panic: %v", recoverValue)
+	wg.Wait()
+	select {
+	case errRecover := <-errRecoverCh:
+		switch {
+		case errRecover.Err != nil:
+			return errRecover.Err
+		case errRecover.Recover != nil:
+			return fmt.Errorf("go routine panic: %v", errRecover.Recover)
+		}
 	}
 	return
 }
