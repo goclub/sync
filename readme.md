@@ -2,150 +2,39 @@
 
 > xsync
 
+## sync.Mutex 互斥锁
+
+使用 routine 并发操作数据时需要使用互斥锁来避免数据竞争导致的数据不一致(并发问题)
+
+[数据竞争](./examples/internal/data_race/main.go?embed)
+
+
+## 由浅入深的介绍 goroutine channel
+
+1. 因为想要异步和并发，所以需要 goroutine
+2. 因为想要通信，所以需要 channel, 记住 channel 一定要 make
+3. 将 channel 在代码中连成一条线，并且考虑发送和接收都可能出现堵塞。做到人脑都可以判断死锁。
+4. 理解缓冲通道带来的非堵塞特性
+5. 有多个 channel 时就使用 select 防止死锁
+6. for{} 死循环可以应用在一些会持续不断的通过 channel 发送和接收数据的场景
+
+
+
 ## xsync.Routine
 
 ## 不安全的 routine
 
-[unsafe_routine](examples/internal/unsafe_routine/main.go)
-```.go
-package main
-
-import (
-	"log"
-	"net/http"
-	"sync"
-)
-
-func main () {
-	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		wg := sync.WaitGroup{}
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			// 直接使用 go func 时如果没有 defer 处理 panic 会导致整个http监听都中断。在项目中会导致服务意外中断
-			// 因为没办法检查 routine 中有没有可能会导致 panic 的代码
-			query := request.URL.Query()
-			if query.Get("name") == "nimoc" {
-				panic("name can not be nimoc")
-			}
-		}()
-		wg.Wait()
-		_, err := writer.Write([]byte("ok")) ; if err != nil {
-			log.Print(err)
-			writer.WriteHeader(500)
-		}
-	})
-	addr := ":4001"
-	log.Print("访问 http://127.0.0.1" + addr)
-	log.Print("然后访问 http://127.0.0.1" + addr + "/?name=nimoc")
-	log.Print("接着访问 http://127.0.0.1" + addr)
-	log.Print("会发现第三次访问时服务已经中断了")
-	log.Print(http.ListenAndServe(addr, nil))
-}
-
-```
+[unsafe_routine](examples/internal/unsafe_routine/main.go?embed)
 
 在web服务中子 routine 如果没有通过 defer 和  recover 处理 panic 会导致整个服务中断
 
 ## 通过 defer recover 防止服务中断
 
-[recover_routine](examples/internal/recover_routine/main.go)
-```.go
-package main
+[recover_routine](examples/internal/recover_routine/main.go?embed)
 
-import (
-	"log"
-	"net/http"
-	"sync"
-)
+## 使用 xsync.Routine{}.Go() 防止服务中断
 
-func main () {
-	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		wg := sync.WaitGroup{}
-		wg.Add(1)
-		/* 新增代码 */ var recoverValue interface{}
-		go func() {
-			defer wg.Done()
-			/* <- 新增代码 */
-			defer func() {
-				r := recover()
-				if r != nil {
-					recoverValue = r
-				}
-			}()
-			/* -> */
-			query := request.URL.Query()
-			if query.Get("name") == "nimoc" {
-				panic("name can not be nimoc")
-			}
-		}()
-		wg.Wait()
-		/* <- 新增代码 */
-		if recoverValue != nil {
-			log.Print(recoverValue)
-			writer.WriteHeader(500) ; return
-		}
-		/* -> */
-		_, err := writer.Write([]byte("ok")) ; if err != nil {
-			log.Print(err)
-			writer.WriteHeader(500)
-		}
-	})
-	addr := ":4002"
-	log.Print("访问 http://127.0.0.1" + addr)
-	log.Print("然后访问 http://127.0.0.1" + addr + "/?name=nimoc")
-	log.Print("接着访问 http://127.0.0.1" + addr)
-	log.Print("第三次访问时服务还是正常的")
-	log.Print(http.ListenAndServe(addr, nil))
-}
-
-```
-
-## 使用 xsync.Routine{}.Go() 防止服务中断 
-
-[safe_routine](examples/internal/safe_routine/main.go)
-```.go
-package main
-
-import (
-	xsync "github.com/goclub/sync"
-	"log"
-	"net/http"
-)
-
-func main () {
-	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		routine := new(xsync.Routine)
-		routine.Go(func() error {
-			query := request.URL.Query()
-			if query.Get("name") == "nimoc" {
-				panic("name can not be nimoc")
-			}
-			return nil
-		})
-		err, recoverValue := routine.Wait()
-		if err != nil {
-			log.Print(err)
-			writer.WriteHeader(500) ; return
-		}
-		if recoverValue != nil {
-			log.Print(recoverValue)
-			writer.WriteHeader(500) ; return
-		}
-		_, err = writer.Write([]byte("ok")) ; if err != nil {
-			log.Print(err)
-			writer.WriteHeader(500); return
-		}
-	})
-	addr := ":4003"
-	log.Print("访问 http://127.0.0.1" + addr)
-	log.Print("然后访问 http://127.0.0.1" + addr + "/?name=nimoc")
-	log.Print("接着访问 http://127.0.0.1" + addr)
-	log.Print("第三次访问时服务还是正常的")
-	log.Print(http.ListenAndServe(addr, nil))
-}
-
-```
+[safe_routine](examples/internal/safe_routine/main.go?embed)
 
 `xsync.Routine{}.Go(routine func() error)` 在 routine 前通过 defer recover 捕获了 panic ,
 并通过 `xsync.Routine{}.Wait() (error, interface{})` 返回了错误和异常方便进行处理。
