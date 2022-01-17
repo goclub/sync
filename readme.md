@@ -6,11 +6,11 @@
 
 使用 routine 并发操作数据时需要使用互斥锁来避免数据竞争导致的数据不一致(并发问题)
 
-[数据竞争](./examples/internal/data_race/main.go?embed)
+[数据竞争](./example/internal/data_race/main.go?embed)
 
 ## sync.WaitGroup 等待协同
 
-在 [数据竞争](./examples/internal/data_race/main.go?embed) 示例中就使用了 WaitGroup 来等待多个routine执行完成再退出程序
+在 [数据竞争](./example/internal/data_race/main.go?embed) 示例中就使用了 WaitGroup 来等待多个routine执行完成再退出程序
 
 ## xsync.Once 只执行一次
 
@@ -22,17 +22,17 @@ xsync.Once 在 sync.Once 基础之上增加了错误传递功能
 
 ## 不安全的 routine
 
-[unsafe_routine](examples/internal/unsafe_routine/main.go?embed)
+[unsafe_routine](example/internal/unsafe_routine/main.go?embed)
 
 在web服务中子 routine 如果没有通过 defer 和  recover 处理 panic 会导致整个服务中断
 
 ## 通过 defer recover 防止服务中断
 
-[recover_routine](examples/internal/recover_routine/main.go?embed)
+[recover_routine](example/internal/recover_routine/main.go?embed)
 
 ## 使用 xsync.Routine{}.Go() 防止服务中断
 
-[safe_routine](examples/internal/safe_routine/main.go?embed)
+[safe_routine](example/internal/safe_routine/main.go?embed)
 
 `xsync.Routine{}.Go(routine func() error)` 在 routine 前通过 defer recover 捕获了 panic ,
 并通过 `xsync.Routine{}.Wait() (error, interface{})` 返回了错误和异常方便进行处理。
