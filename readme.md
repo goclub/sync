@@ -8,17 +8,15 @@
 
 [数据竞争](./examples/internal/data_race/main.go?embed)
 
+## sync.WaitGroup 等待协同
 
-## 由浅入深的介绍 goroutine channel
+在 [数据竞争](./examples/internal/data_race/main.go?embed) 示例中就使用了 WaitGroup 来等待多个routine执行完成再退出程序
 
-1. 因为想要异步和并发，所以需要 goroutine
-2. 因为想要通信，所以需要 channel, 记住 channel 一定要 make
-3. 将 channel 在代码中连成一条线，并且考虑发送和接收都可能出现堵塞。做到人脑都可以判断死锁。
-4. 理解缓冲通道带来的非堵塞特性
-5. 有多个 channel 时就使用 select 防止死锁
-6. for{} 死循环可以应用在一些会持续不断的通过 channel 发送和接收数据的场景
+## xsync.Once 只执行一次
 
+xsync.Once 在 sync.Once 基础之上增加了错误传递功能
 
+[once_test](./once_test.go?embed)
 
 ## xsync.Routine
 
@@ -39,3 +37,12 @@
 `xsync.Routine{}.Go(routine func() error)` 在 routine 前通过 defer recover 捕获了 panic ,
 并通过 `xsync.Routine{}.Wait() (error, interface{})` 返回了错误和异常方便进行处理。
 增加 error 的支持是因为这样能更方便的传递错误，如果没有错误的时候返回 nil 即可。
+
+## routine channel
+
+1. 因为想要异步和并发，所以需要 goroutine
+2. 因为想要通信，所以需要 channel, 记住 channel 一定要 make
+3. 将 channel 在代码中连成一条线，并且考虑发送和接收都可能出现堵塞。做到人脑都可以判断死锁。
+4. 理解缓冲通道带来的非堵塞特性
+5. 有多个 channel 时就使用 select 防止死锁
+6. for{} 死循环可以应用在一些会持续不断的通过 channel 发送和接收数据的场景

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 /*
-默认情况下，通信是同步且无缓冲的：在**有**接受者接收数据之前，发送会堵塞
+默认情况下，通信是同步且无缓冲的：在有接受者接收数据之前，发送会堵塞
 */
 func TestSendReceive(t *testing.T) {
 	send := func (integerCh chan int) {
