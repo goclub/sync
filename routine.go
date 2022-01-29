@@ -12,7 +12,7 @@ type Routine struct {
 func NewRoutine() *Routine {
 	return new(Routine)
 }
-func (r *Routine) Go(routine func() error) {
+func (r *Routine) Go(routine func() (err error)) {
 	r.wg.Add(1)
 	go func() {
 		defer r.wg.Done()
