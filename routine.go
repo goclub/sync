@@ -9,6 +9,9 @@ type Routine struct {
 	err error
 	recoverValue interface{}
 }
+func NewRoutine() *Routine {
+	return new(Routine)
+}
 func (r *Routine) Go(routine func() error) {
 	r.wg.Add(1)
 	go func() {

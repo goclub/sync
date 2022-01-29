@@ -11,7 +11,7 @@ func TestRoutine_Go(t *testing.T) {
 	// no err no panic
 	{
 		exec := false
-		routine := new(xsync.Routine)
+		routine := xsync.NewRoutine()
 		routine.Go(func() error {
 			exec = true
 			return nil
@@ -24,7 +24,7 @@ func TestRoutine_Go(t *testing.T) {
 	// has err no panic
 	{
 		exec := false
-		routine := new(xsync.Routine)
+		routine := xsync.NewRoutine()
 		routine.Go(func() error {
 			exec = true
 			return errors.New("abc")
@@ -37,7 +37,7 @@ func TestRoutine_Go(t *testing.T) {
 	// no err has panic
 	{
 		exec := false
-		routine := new(xsync.Routine)
+		routine := xsync.NewRoutine()
 		routine.Go(func() error {
 			exec = true
 			panic("xyz")
