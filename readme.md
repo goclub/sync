@@ -1,3 +1,7 @@
+---
+sidebarBasedOnContent: true
+---
+
 # goclub/sync
 
 > 由浅入深介绍 go 中 routine/channel/context,并提供一些便利且安全的函数
