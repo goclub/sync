@@ -1,4 +1,5 @@
 ---
+permalink: /
 sidebarBasedOnContent: true
 ---
 
