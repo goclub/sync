@@ -13,7 +13,8 @@ type Option struct {
 }
 // 通过 Option 控制是否返回错误和运行时间
 func Call(ctx context.Context, opt Option) (string, error) {
-	resultCh := make(chan string)
+	// 使用 1 缓冲通道防止内存泄露
+	resultCh := make(chan string, 1)
 	errCh := make(chan error)
 	go func() {
 		time.Sleep(opt.Sleep)

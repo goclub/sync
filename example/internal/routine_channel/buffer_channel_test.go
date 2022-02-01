@@ -23,11 +23,7 @@ func TestBufferChannel(t *testing.T) {
 	{
 		log.Print("start receive")
 		time.Sleep(time.Second*6)
-		for {
-			v, more := <-integerCh
-			if more == false {
-				break
-			}
+		for v := range integerCh{
 			log.Print("receive: ", v)
 		}
 	}

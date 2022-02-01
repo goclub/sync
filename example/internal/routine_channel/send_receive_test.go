@@ -33,5 +33,6 @@ func TestSendReceive(t *testing.T) {
 			}
 			log.Print("receive: ", v)
 		}
+		// 更简便的方法是直接使用 for v := range integerCh { ... } ,这样无需判断 more 之后 break
 	}
 }

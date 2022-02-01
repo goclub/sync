@@ -18,12 +18,13 @@ func TestCancel(t *testing.T) {
 }
 
 func SleepAndReturn(ctx context.Context, sleep time.Duration) (string, error) {
-	resultCh := make(chan string)
+	resultCh := make(chan string, 1)
 	go func() {
 		log.Print("start sleep")
 		time.Sleep(sleep)
 		log.Print("end sleep")
 		resultCh <- "some"
+		log.Print("sent some")
 	}()
 	select {
 	case <-ctx.Done():

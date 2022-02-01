@@ -1,6 +1,7 @@
 package go_test
 
 import (
+	"context"
 	xerr "github.com/goclub/error"
 	xsync "github.com/goclub/sync"
 	"log"
@@ -9,7 +10,7 @@ import (
 
 // 等待 routine 完成
 func TestWaitRoutineDone(t *testing.T) {
-	errRecoverCh := xsync.Go(func() (err error) {
+	errRecoverCh := xsync.Go(context.TODO(), func() (err error) {
 		return xerr.New("some error")
 	})
 	errRecover := <-errRecoverCh
@@ -26,7 +27,7 @@ func TestGetStringOrError(t *testing.T) {
 	// 修改 sendError 或 sendPanic 为 true 来观察运行结果
 	sendPanic := false
 	sendError := false
-	errRecoverCh := xsync.Go(func() (err error) {
+	errRecoverCh := xsync.Go(context.TODO(), func() (err error) {
 		if sendPanic {
 			panic("some panic")
 		}

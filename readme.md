@@ -52,13 +52,21 @@ routine channel 的理解需要大量的实践
 
 ## xsync.Go
 
-xsync.Go 方法能提供安全的 routine, 当发生错误和panics时候可以通过 `chan xsync.ErrorRecover` 传递 error 和 recover() 
+xsync.CoreGo 方法能提供安全的 routine, 当发生错误和 panic 时候可以通过 `chan xsync.ErrorRecover` 传递 error 和 recover()  
 
-[xsync.Go 使用示例](example/internal/gofunc/go_test.go?embed)
+[xsync.CoreGo 使用示例](example/internal/gofunc/core_go_test.go?embed)
 
-实现很简单,感兴趣可以看看源码
+实现很简单,感兴趣可以看看源码 (阅读源码时候建议先理解 xsync.CoreGo 再理解 xsync.Go)
+
+[xsync.CoreGo 源码](core_go.go?embed)
+
+
+xsync.Go 是 xsync.CoreGo 的加强版,它支持了 context.后面的章节会详细介绍 context 
+
+
+[xsync.Go 使用示例](./go_test.go?embed)
+
 [xsync.Go 源码](go.go?embed)
-
 
 ## context
 
@@ -74,6 +82,18 @@ xsync.Go 方法能提供安全的 routine, 当发生错误和panics时候可以�
 
 [代码](./example/internal/context/with_cancel_test.go)
 
+
+> 不是只有你想中途放弃，才去调用 cancel，只要你的任务正常完成了，就需要调用 cancel.
+> 这样，这个 Context 才能释放它的资源（通知它的 children 处理 cancel，从它的 parent 中把自己移除.
+> 甚至释放相关的 goroutine）。
+> 很多人在使用这个方法的时候，都会忘记调用 cancel，切记切记，而且一定尽早释放。
+
+
+> cancel 是向下传递的.
+> 如果一个 WithCancel 生成的 Context 被 cancel 时，
+> 如果它的子 Context（也有可能是孙，或者更低，依赖子的类型）也是 cancelCtx 类型的，
+> 就会被 cancel，但是不会向上传递。
+> parent Context 不会因为子 Context 被 cancel 而 cancel。
 
 ## WithTimeout
 
@@ -112,12 +132,28 @@ case result := <- resultCh:
 }
 ```
 
-如果你调用的函数没有对 ctx 进行支持, ctx 主动 cancel() 和 被动 timeout 都无法让调用函数取消.**基础库基本上都支持ctx的取消操作**
-
-
 我们来看下面这段代码,并且运行它:
 
 [代码](./example/internal/context/cancel_test.go)
 
 > ctx 的取消只是"不管"函数的运行结果,强行认定函数执行"错误",并将错误原因定义为超时.
 > 即使被取消,被调用的函数的其他操作依然会继续运行
+
+
+## routine 泄露
+
+> 很多原因会导致 channel堵塞,一旦发生意料之外的持续的堵塞会导致routine一直不被释放.这种情况叫routine泄露,会导致CPU内存爆满.
+
+主 routine退出后，系统会自动回收运行时资源，一般情况下子 routine 会自动释放
+但是应该尽量避免泄露。比如在常驻服务中，比如 http server，每接收到一个请求，便会启动一次协程.
+那么 子routine越来越多，每次启动的 routine 都得不到释放，内存占用和CPU会越来越高直到崩溃
+避免 bug 的方法是:使用容量为1的缓冲通道
+我们可通过性能分析去观测内存泄露的代码
+
+[代码](./example/internal/routine_leaks/main.go)
+
+
+> 死记硬背 routine 泄露的几种情况是治标不治本,理解泄露的原因就可以通过推论得到答案.
+
+
+

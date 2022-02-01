@@ -1,23 +1,18 @@
 package xsync
 
-type ErrorRecover struct {
-	Err error
-	Recover interface{}
-}
-func Go(routine func() (err error)) (errRecoverCh chan ErrorRecover) {
-	errRecoverCh = make(chan ErrorRecover)
+import "context"
+
+func Go(ctx context.Context, routine func() (err error)) (errRecoverCh chan ErrorRecover) {
+	errRecoverCh = make(chan ErrorRecover, 1)
+	routineResultCh := CoreGo(routine)
 	go func() {
-		errRecover := ErrorRecover{}
-		defer func() {
-			r := recover()
-			if r != nil {
-				errRecover.Recover = r
+		select {
+		case routineResult := <- routineResultCh:
+			errRecoverCh <- routineResult
+		case <- ctx.Done():
+			errRecoverCh <- ErrorRecover{
+				Err:  ctx.Err(),
 			}
-			errRecoverCh <- errRecover
-		}()
-		routineErr := routine()
-		if routineErr != nil {
-			errRecover.Err = routineErr
 		}
 	}()
 	return
