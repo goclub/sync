@@ -15,8 +15,8 @@ func main () {
 			// 直接使用 go func 时如果没有 defer 处理 panic 会导致整个http监听都中断。在项目中会导致服务意外中断
 			// 因为没办法检查 routine 中有没有可能会导致 panic 的代码
 			query := request.URL.Query()
-			if query.Get("name") == "nimoc" {
-				panic("name can not be nimoc")
+			if query.Get("name") == "goclub" {
+				panic("name can not be goclub")
 			}
 		}()
 		wg.Wait()

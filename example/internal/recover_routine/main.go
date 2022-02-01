@@ -17,7 +17,6 @@ func main () {
 
 		go func() {
 			defer wg.Done()
-
 			/* <- 新增的代码 */
 			defer func() {
 				r := recover()

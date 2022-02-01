@@ -11,23 +11,27 @@ import (
 func TestSendReceive(t *testing.T) {
 	send := func (integerCh chan int) {
 		log.Print("start send")
-		for i:=0;i<3;i++ {
+		for i:=1;i<4;i++ {
 			log.Print("about to send: ", i)
 			integerCh <- i
 			log.Print("sent: ", i)
-
 		}
+		// 发送三次后关闭通道
+		close(integerCh)
 	}
-	receive := func (integerCh chan int) {
+	integerCh := make(chan int)
+	go send(integerCh)
+	{
+
 		log.Print("start receive")
 		time.Sleep(time.Second*2) // 在接收方没有开始 v := <- 时，发送方的 integerCh <- i 将会堵塞
 		for {
-			v := <- integerCh
+			v, more := <- integerCh
+			// 如果通道关闭了没有更多的信息传递则退出循环等待
+			if more == false {
+				break
+			}
 			log.Print("receive: ", v)
 		}
 	}
-	intergetCh := make(chan int)
-	go send(intergetCh)
-	go receive(intergetCh)
-	time.Sleep(time.Second*6) // 让send receive 有足够的时间去执行
 }

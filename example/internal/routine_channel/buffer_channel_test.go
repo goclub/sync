@@ -8,25 +8,27 @@ import (
 
 // 缓冲通道在没有接受者的情况下，发送者依然可以发送指定数量的消息。不会像堵塞通道那样在发送时因为没有接受者被堵塞。
 func TestBufferChannel(t *testing.T) {
-	intergetCh := make(chan int, 3)
+	integerCh := make(chan int, 3)
 	send := func (integerCh chan int) {
 		log.Print("start send")
-		for i:=0;i<10;i++ {
+		for i:=1;i<7;i++ {
 			log.Print("about to send: ", i)
 			integerCh <- i
 			log.Print("sent: ", i)
 			time.Sleep(time.Second)
 		}
+		close(integerCh)
 	}
-	receive := func (integerCh chan int) {
+	go send(integerCh)
+	{
 		log.Print("start receive")
-		time.Sleep(time.Second*3)
+		time.Sleep(time.Second*6)
 		for {
-			v := <- integerCh
+			v, more := <-integerCh
+			if more == false {
+				break
+			}
 			log.Print("receive: ", v)
 		}
 	}
-	go send(intergetCh)
-	go receive(intergetCh)
-	time.Sleep(time.Second*10) // 让send receive 有足够的时间去执行
 }

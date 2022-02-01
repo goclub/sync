@@ -36,6 +36,7 @@ func TestGetStringOrError(t *testing.T) {
 		nameCh <- "goclub"
 		return
 	})
+	// 不使用 select 会导致死锁
 	select {
 	case errRecover := <-errRecoverCh:
 		if errRecover.Err != nil {

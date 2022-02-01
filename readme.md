@@ -28,6 +28,9 @@ xsync.Once 在 sync.Once 基础之上增加了错误传递功能
 
 routine channel 的理解需要大量的实践 
 
+
+>  routine 是平行时空 channel 是用于传递信息的时空通道
+
 |编号|理论|代码|
 |---|---|---|
 | 1 | 实现异步和并发，需要使用 go func() 开启新的 routine ,在新的 routine 中做更多的事,让主程序继续运行 | |
@@ -94,7 +97,7 @@ xsync.Go 方法能提供安全的 routine, 当发生错误和panics时候可以�
 
 上面的示例基本上都展示了 ctx 的各种取消场景.
 
-严谨 [Call(ctx context.Context, opt Option)](./example/internal/context/call_test.go) 的源码可以发现它是启动了一个新的 routine.
+研究 [Call(ctx context.Context, opt Option)](./example/internal/context/call_test.go) 的源码可以发现它是启动了一个新的 routine.
 
 在新的routine中执行一些耗时操作,并且必须使用 `select` 去判断哪个通道先返回,不同的通道返回时候的处理方式不同.
 
@@ -117,4 +120,4 @@ case result := <- resultCh:
 [代码](./example/internal/context/cancel_test.go)
 
 > ctx 的取消只是"不管"函数的运行结果,强行认定函数执行"错误",并将错误原因定义为超时.
-> 即使被取消被调用的函数的其他操作依然会继续运行
+> 即使被取消,被调用的函数的其他操作依然会继续运行

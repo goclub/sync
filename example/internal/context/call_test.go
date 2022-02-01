@@ -7,7 +7,7 @@ import (
 )
 
 type Option struct {
-	Name string
+	Output string
 	ReturnError bool
 	Sleep time.Duration
 }
@@ -18,10 +18,10 @@ func Call(ctx context.Context, opt Option) (string, error) {
 	go func() {
 		time.Sleep(opt.Sleep)
 		if opt.ReturnError {
-			errCh <- xerr.New(opt.Name + " error")
+			errCh <- xerr.New(opt.Output + " error")
 			return
 		}
-		resultCh <- opt.Name + " success"
+		resultCh <- opt.Output + " success"
 	}()
 	select {
 	case <- ctx.Done():

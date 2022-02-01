@@ -12,7 +12,7 @@ func TestWithTimeout(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 		defer cancel()
 		s, err := Call(ctx, Option{
-			Name: "1",
+			Output: "1",
 			ReturnError: false,
 			Sleep: time.Second*1,
 		}) ; if err != nil {
@@ -25,7 +25,7 @@ func TestWithTimeout(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 		defer cancel()
 		s, err := Call(ctx, Option{
-			Name: "2",
+			Output: "2",
 			ReturnError: false,
 			Sleep: time.Second*3,
 		}) ; if err != nil {
