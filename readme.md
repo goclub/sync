@@ -105,6 +105,10 @@ routine channel 的理解需要大量的实践
 可以在 http 的中间件中将http请求记录到某个数据库中,生成请求的ID.再将请求ID通过 `context.WithValue()` 附加到 ctx 中.
 在后续遇到需要记录错误时,可以使用 `context.Value()` 查询到请求ID,便于调试.
 
+### 实现支持 ctx 的函数
+
+我提供了一份 [样板代码](./example/internal/context/support_ctx_test.go) 供你参考
+
 
 ### routine 在 cancel 之后依然在执行 <a id="routineStillRunningAfterCancel"></a>
 
