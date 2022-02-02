@@ -1,20 +1,39 @@
 package xsync_test
 
 import (
-	"context"
+	xerr "github.com/goclub/error"
 	xsync "github.com/goclub/sync"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"time"
 )
 
-func TestGoWithContext(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*50)
-	defer cancel()
-	errRecoverCh := xsync.Go(ctx, func() (err error) {
-		time.Sleep(time.Millisecond*100)
-		return nil
-	})
-	errRecover := <-errRecoverCh
-	assert.ErrorIs(t, errRecover.Err, context.DeadlineExceeded)
+func TestRoutine_Go(t *testing.T) {
+	// no err no panic
+	{
+		errRecoverCh := xsync.Go(func() (err error) {
+			return nil
+		})
+		errRecover := <-errRecoverCh
+		assert.Equal(t,errRecover.Err, nil)
+		assert.Equal(t,errRecover.Recover, nil)
+	}
+	// has err no panic
+	{
+		errRecoverCh := xsync.Go(func() (err error) {
+			return xerr.New("abc")
+		})
+		errRecover := <-errRecoverCh
+		assert.Error(t,errRecover.Err, "abc")
+		assert.Equal(t,errRecover.Recover, nil)
+	}
+	// no err has panic
+	{
+		errRecoverCh := xsync.Go(func() (err error) {
+			panic(1)
+			return nil
+		})
+		errRecover := <-errRecoverCh
+		assert.Equal(t,errRecover.Err, nil)
+		assert.Equal(t,errRecover.Recover, 1)
+	}
 }

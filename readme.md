@@ -54,19 +54,12 @@ routine channel 的理解需要大量的实践
 
 xsync.CoreGo 方法能提供安全的 routine, 当发生错误和 panic 时候可以通过 `chan xsync.ErrorRecover` 传递 error 和 recover()  
 
-[xsync.CoreGo 使用示例](example/internal/gofunc/core_go_test.go?embed)
+[xsync.Go 使用示例](./go_test.go?embed)
 
 实现很简单,感兴趣可以看看源码 (阅读源码时候建议先理解 xsync.CoreGo 再理解 xsync.Go)
 
-[xsync.CoreGo 源码](core_go.go?embed)
-
-
-xsync.Go 是 xsync.CoreGo 的加强版,它支持了 context.后面的章节会详细介绍 context 
-
-
-[xsync.Go 使用示例](./go_test.go?embed)
-
 [xsync.Go 源码](go.go?embed)
+
 
 ## context
 
