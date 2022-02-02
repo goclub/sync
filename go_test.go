@@ -32,8 +32,8 @@ func TestRoutine_Go(t *testing.T) {
 		})
 		err := <-errCh
 		assert.Error(t,err, "1")
-		is, errPanic := xsync.IsErrPanic(err)
-		assert.Equal(t, is, true)
+		as, errPanic := xsync.AsErrPanic(err)
+		assert.Equal(t, as, true)
 		assert.Equal(t,errPanic.Recover, 1)
 		// xerr.PrintStack(err)
 		// log.Print(string(errPanic.Stack))

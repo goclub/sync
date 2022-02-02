@@ -13,7 +13,7 @@ type ErrPanic struct {
 func (e *ErrPanic) Error() string {
 	return fmt.Sprintf("%+v", e.Recover)
 }
-func IsErrPanic(err error) (is bool, errPanic ErrPanic) {
+func AsErrPanic(err error) (as bool, errPanic ErrPanic) {
 	var target *ErrPanic
 	if xerr.As(err, &target) {
 		return true, *target

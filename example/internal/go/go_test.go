@@ -37,7 +37,7 @@ func TestGetStringOrError(t *testing.T) {
 	select {
 	case err := <-errCh:
 		if err != nil {
-			if is, errPanic := xsync.IsErrPanic(err); is {
+			if is, errPanic := xsync.AsErrPanic(err); is {
 				log.Print(errPanic.Recover, string(errPanic.Stack))
 			} else {
 				xerr.PrintStack(err)

@@ -54,7 +54,7 @@ routine channel 的理解需要大量的实践
 
 ## xsync.Go
 
-使用 xsync.Go 可以避免子routine panic 后退出,并且可以通过 `is, errPanic := xsync.IsErrPanic(err)` 判断是否发生 panic
+使用 xsync.Go 可以避免子routine panic 后退出,并且可以通过 `as, errPanic := xsync.AsErrPanic(err)` 判断是否发生 panic
 
 [xsync.Go 使用示例](example/internal/go/go_test.go?embed)
 
