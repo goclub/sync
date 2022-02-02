@@ -135,7 +135,7 @@ case result := <- resultCh:
 
 ## routine 泄露
 
-> 很多原因会导致 channel堵塞,一旦发生意料之外的持续的堵塞会导致routine一直不被释放.这种情况叫routine泄露,会导致CPU内存爆满.
+> 很多原因会导致 channel 堵塞,一旦发生意料之外的持续的堵塞会导致routine一直不被释放.这种情况叫routine泄露,会导致CPU内存爆满.
 
 主 routine退出后，系统会自动回收运行时资源，一般情况下子 routine 会自动释放
 但是应该尽量避免泄露。比如在常驻服务中，比如 http server，每接收到一个请求，便会启动一次协程.
