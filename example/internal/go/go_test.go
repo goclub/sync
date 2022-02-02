@@ -1,7 +1,6 @@
 package go_test
 
 import (
-	"context"
 	xerr "github.com/goclub/error"
 	xsync "github.com/goclub/sync"
 	"log"
@@ -10,15 +9,12 @@ import (
 
 // 等待 routine 完成
 func TestWaitRoutineDone(t *testing.T) {
-	errRecoverCh := xsync.Go(context.TODO(), func() (err error) {
+	errCh := xsync.Go(func() (err error) {
 		return xerr.New("some error")
 	})
-	errRecover := <-errRecoverCh
-	if errRecover.Err != nil {
-		log.Print("err: ", errRecover.Err)
-	}
-	if errRecover.Recover != nil {
-		log.Print("Recover: ", errRecover.Recover)
+	err := <-errCh
+	if err != nil {
+		xerr.PrintStack(err)
 	}
 }
 // routine 通过channel 返回字符串或者 ErrorRecover
@@ -27,7 +23,7 @@ func TestGetStringOrError(t *testing.T) {
 	// 修改 sendError 或 sendPanic 为 true 来观察运行结果
 	sendPanic := false
 	sendError := false
-	errRecoverCh := xsync.Go(context.TODO(), func() (err error) {
+	errCh := xsync.Go(func() (err error) {
 		if sendPanic {
 			panic("some panic")
 		}
@@ -39,12 +35,13 @@ func TestGetStringOrError(t *testing.T) {
 	})
 	// 不使用 select 会导致死锁
 	select {
-	case errRecover := <-errRecoverCh:
-		if errRecover.Err != nil {
-			log.Print("err: ", errRecover.Err)
-		}
-		if errRecover.Recover != nil {
-			log.Print("Recover: ", errRecover.Recover)
+	case err := <-errCh:
+		if err != nil {
+			if is, errPanic := xsync.IsErrPanic(err); is {
+				log.Print(errPanic.Recover, string(errPanic.Stack))
+			} else {
+				xerr.PrintStack(err)
+			}
 		}
 	case name := <-nameCh:
 		log.Print("name: ", name)

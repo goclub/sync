@@ -1,24 +1,43 @@
 package xsync
 
-type ErrorRecover struct {
-	Err error
+import (
+	"fmt"
+	xerr "github.com/goclub/error"
+	"runtime/debug"
+)
+
+type ErrPanic struct {
 	Recover interface{}
+	Stack []byte
 }
-func Go(routine func() (err error)) (errRecoverCh chan ErrorRecover) {
+func (e *ErrPanic) Error() string {
+	return fmt.Sprintf("%+v", e.Recover)
+}
+func IsErrPanic(err error) (is bool, errPanic ErrPanic) {
+	var target *ErrPanic
+	if xerr.As(err, &target) {
+		return true, *target
+	}
+	return
+}
+func Go(routine func() (err error)) (errCh chan error) {
 	// 使用 1 缓存通道防止routine 泄露
-	errRecoverCh = make(chan ErrorRecover, 1)
+	errCh = make(chan error, 1)
 	go func() {
-		errRecover := ErrorRecover{}
+		var err error
 		defer func() {
 			r := recover()
 			if r != nil {
-				errRecover.Recover = r
+				err = xerr.WithStack(&ErrPanic{
+					Recover: r,
+					Stack: debug.Stack(),
+				})
 			}
-			errRecoverCh <- errRecover
+			errCh <- err
 		}()
 		routineErr := routine()
 		if routineErr != nil {
-			errRecover.Err = routineErr
+			err = routineErr
 		}
 	}()
 	return

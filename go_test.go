@@ -10,30 +10,32 @@ import (
 func TestRoutine_Go(t *testing.T) {
 	// no err no panic
 	{
-		errRecoverCh := xsync.Go(func() (err error) {
+		errCh := xsync.Go(func() (err error) {
 			return nil
 		})
-		errRecover := <-errRecoverCh
-		assert.Equal(t,errRecover.Err, nil)
-		assert.Equal(t,errRecover.Recover, nil)
+		err := <-errCh
+		assert.Equal(t,err, nil)
 	}
 	// has err no panic
 	{
-		errRecoverCh := xsync.Go(func() (err error) {
+		errCh := xsync.Go(func() (err error) {
 			return xerr.New("abc")
 		})
-		errRecover := <-errRecoverCh
-		assert.Error(t,errRecover.Err, "abc")
-		assert.Equal(t,errRecover.Recover, nil)
+		err := <-errCh
+		assert.Error(t,err, "abc")
 	}
 	// no err has panic
 	{
-		errRecoverCh := xsync.Go(func() (err error) {
+		errCh := xsync.Go(func() (err error) {
 			panic(1)
 			return nil
 		})
-		errRecover := <-errRecoverCh
-		assert.Equal(t,errRecover.Err, nil)
-		assert.Equal(t,errRecover.Recover, 1)
+		err := <-errCh
+		assert.Error(t,err, "1")
+		is, errPanic := xsync.IsErrPanic(err)
+		assert.Equal(t, is, true)
+		assert.Equal(t,errPanic.Recover, 1)
+		// xerr.PrintStack(err)
+		// log.Print(string(errPanic.Stack))
 	}
 }

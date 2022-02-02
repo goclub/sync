@@ -50,13 +50,13 @@ routine channel 的理解需要大量的实践
 
 [recover_routine](example/internal/recover_routine/main.go?embed)
 
+[使用 xsync.Go 运行安全的 routine](example/internal/safe_routine/main.go?embed)
+
 ## xsync.Go
 
-xsync.CoreGo 方法能提供安全的 routine, 当发生错误和 panic 时候可以通过 `chan xsync.ErrorRecover` 传递 error 和 recover()  
+使用 xsync.Go 可以避免子routine panic 后退出,并且可以通过 `is, errPanic := xsync.IsErrPanic(err)` 判断是否发生 panic
 
-[xsync.Go 使用示例](./go_test.go?embed)
-
-实现很简单,感兴趣可以看看源码 (阅读源码时候建议先理解 xsync.CoreGo 再理解 xsync.Go)
+[xsync.Go 使用示例](example/internal/go/go_test.go?embed)
 
 [xsync.Go 源码](go.go?embed)
 
@@ -69,7 +69,7 @@ xsync.CoreGo 方法能提供安全的 routine, 当发生错误和 panic 时候�
 
 `Call` 函数 使用了 `select` 来等待 `ctx.Done()` `errCh` `resultCh` 三个 channel 的返回
 
-## WithCancel
+### WithCancel
 
 调用AB两个接口(http/rpc),当其中任何一个调用失败时取消调用另外一个接口
 
@@ -88,17 +88,17 @@ xsync.CoreGo 方法能提供安全的 routine, 当发生错误和 panic 时候�
 > 就会被 cancel，但是不会向上传递。
 > parent Context 不会因为子 Context 被 cancel 而 cancel。
 
-## WithTimeout
+### WithTimeout
 
 调用接口时指定最大运行时,超过时间则返回 err,这样能避免因为某些接口意外的响应慢或者网络抖动导致整个程序"卡死"
 
 [代码](./example/internal/context/with_timeout_test.go)
 
-## WithDeadline
+### WithDeadline
 
 `context.WithDeadline` 与 `WithTimeout` 类似. `WithTimeout` 是控制多久后"触发" `<-ctx.Done()`, `WithDeadline` 是控制生米时候"触发" `<-ctx.Done()`
 
-## WithValue
+### WithValue
 
 `context.WithValue()` 用于附加信息到 ctx 中, `context.Value()` 用于读取附加信息
 
@@ -106,7 +106,7 @@ xsync.CoreGo 方法能提供安全的 routine, 当发生错误和 panic 时候�
 在后续遇到需要记录错误时,可以使用 `context.Value()` 查询到请求ID,便于调试.
 
 
-## context 真的取消了其他操作吗?
+### routine 在 cancel 之后依然在执行 <a id="routineStillRunningAfterCancel"></a>
 
 上面的示例基本上都展示了 ctx 的各种取消场景.
 
@@ -133,7 +133,7 @@ case result := <- resultCh:
 > 即使被取消,被调用的函数的其他操作依然会继续运行
 
 
-## routine 泄露
+## routine 泄露 <a id="routine-leaks"></a>
 
 > 很多原因会导致 channel 堵塞,一旦发生意料之外的持续的堵塞会导致routine一直不被释放.这种情况叫routine泄露,会导致CPU内存爆满.
 

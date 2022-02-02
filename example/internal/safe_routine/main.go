@@ -1,6 +1,7 @@
 package main
 
 import (
+	xerr "github.com/goclub/error"
 	xsync "github.com/goclub/sync"
 	"log"
 	"net/http"
@@ -8,25 +9,20 @@ import (
 
 func main () {
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		routine := new(xsync.Routine)
-		routine.Go(func() error {
+		errCh := xsync.Go(func() error {
 			query := request.URL.Query()
 			if query.Get("name") == "nimoc" {
 				panic("name can not be nimoc")
 			}
 			return nil
 		})
-		err, recoverValue := routine.Wait()
+		err := <- errCh
 		if err != nil {
-			log.Print(err)
-			writer.WriteHeader(500) ; return
-		}
-		if recoverValue != nil {
-			log.Print(recoverValue)
+			xerr.PrintStack(err)
 			writer.WriteHeader(500) ; return
 		}
 		_, err = writer.Write([]byte("ok")) ; if err != nil {
-			log.Print(err)
+			xerr.PrintStack(err)
 			writer.WriteHeader(500); return
 		}
 	})
