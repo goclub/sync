@@ -10,7 +10,7 @@ import (
 )
 
 func TestSupportCtx(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	data ,err := supportCtx(ctx) ; if err != nil {
 	    xerr.PrintStack(err)
@@ -18,11 +18,11 @@ func TestSupportCtx(t *testing.T) {
 		log.Print(data)
 	}
 }
-// 固定1秒后返回字符串(支持 ctx)
+// 固定2秒后返回字符串(支持 ctx)
 func supportCtx(ctx context.Context) (data string, err error) {
 	dataCh := make(chan string, 1)
 	errCh := xsync.Go(func() (err error) {
-		time.Sleep(time.Second)
+		time.Sleep(time.Second*2)
 		dataCh <- "abc"
 		return
 	})
