@@ -14,7 +14,7 @@ func main () {
 		// 打开 http://127.0.0.1:6060/debug/pprof/
 		// 不断刷新页面观察 goroutine 左侧数字,可以发现一直在增长
 		addr := ":6060"
-		log.Print("http://127.0.0.1:"+addr+"/debug/pprof/")
+		log.Print("http://127.0.0.1"+addr+"/debug/pprof/")
 		log.Print(http.ListenAndServe(addr, nil))
 	}()
 	for {
