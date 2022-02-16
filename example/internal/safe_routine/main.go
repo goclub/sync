@@ -9,14 +9,17 @@ import (
 
 func main () {
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		errCh := xsync.Go(func() error {
+		errCh, err := xsync.Go(func() error {
 			query := request.URL.Query()
 			if query.Get("name") == "nimoc" {
 				panic("name can not be nimoc")
 			}
 			return nil
-		})
-		err := <- errCh
+		}) ; if err != nil {
+			xerr.PrintStack(err)
+			writer.WriteHeader(500) ; return
+		}
+		err = <- errCh
 		if err != nil {
 			xerr.PrintStack(err)
 			writer.WriteHeader(500) ; return

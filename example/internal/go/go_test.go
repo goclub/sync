@@ -3,16 +3,17 @@ package go_test
 import (
 	xerr "github.com/goclub/error"
 	xsync "github.com/goclub/sync"
+	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
 )
 
 // 等待 routine 完成
 func TestWaitRoutineDone(t *testing.T) {
-	errCh := xsync.Go(func() (err error) {
+	errCh, err := xsync.Go(func() (err error) {
 		return xerr.New("some error")
-	})
-	err := <-errCh
+	}) ; assert.NoError(t, err)
+	err = <-errCh
 	if err != nil {
 		xerr.PrintStack(err)
 	}
@@ -23,7 +24,7 @@ func TestGetStringOrError(t *testing.T) {
 	// 修改 sendError 或 sendPanic 为 true 来观察运行结果
 	sendPanic := false
 	sendError := false
-	errCh := xsync.Go(func() (err error) {
+	errCh, err := xsync.Go(func() (err error) {
 		if sendPanic {
 			panic("some panic")
 		}
@@ -32,10 +33,10 @@ func TestGetStringOrError(t *testing.T) {
 		}
 		nameCh <- "goclub"
 		return
-	})
+	}) ; assert.NoError(t, err)
 	// 不使用 select 会导致死锁
 	select {
-	case err := <-errCh:
+	case err = <-errCh:
 		if err != nil {
 			if is, errPanic := xsync.AsErrPanic(err); is {
 				log.Print(errPanic.Recover, string(errPanic.Stack))

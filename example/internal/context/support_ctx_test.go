@@ -21,11 +21,13 @@ func TestSupportCtx(t *testing.T) {
 // 固定2秒后返回字符串(支持 ctx)
 func supportCtx(ctx context.Context) (data string, err error) {
 	dataCh := make(chan string, 1)
-	errCh := xsync.Go(func() (err error) {
+	errCh, err := xsync.Go(func() (err error) {
 		time.Sleep(time.Second*2)
 		dataCh <- "abc"
 		return
-	})
+	}) ; if err != nil {
+	    return
+	}
 	select {
 	case data = <- dataCh:
 	return
