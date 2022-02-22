@@ -65,7 +65,7 @@ routine channel 的理解需要大量的实践
 
 了解 context 之前我们先写一个用于测试的函数 
 
-[代码](./example/internal/context/call_test.go)
+[代码](./example/internal/context/call_test.go?embed)
 
 `Call` 函数 使用了 `select` 来等待 `ctx.Done()` `errCh` `resultCh` 三个 channel 的返回
 
@@ -73,7 +73,7 @@ routine channel 的理解需要大量的实践
 
 调用AB两个接口(http/rpc),当其中任何一个调用失败时取消调用另外一个接口
 
-[代码](./example/internal/context/with_cancel_test.go)
+[代码](./example/internal/context/with_cancel_test.go?embed)
 
 
 > 不是只有你想中途放弃，才去调用 cancel，只要你的任务正常完成了，就需要调用 cancel.
@@ -92,7 +92,7 @@ routine channel 的理解需要大量的实践
 
 调用接口时指定最大运行时,超过时间则返回 err,这样能避免因为某些接口意外的响应慢或者网络抖动导致整个程序"卡死"
 
-[代码](./example/internal/context/with_timeout_test.go)
+[代码](./example/internal/context/with_timeout_test.go?embed)
 
 ### WithDeadline
 
@@ -107,14 +107,14 @@ routine channel 的理解需要大量的实践
 
 ### 实现支持 ctx 的函数
 
-我提供了一份 [样板代码](./example/internal/context/support_ctx_test.go) 供你参考
+我提供了一份 [样板代码](./example/internal/context/support_ctx_test.go?embed) 供你参考
 
 
 ### routine 在 cancel 之后依然在执行 <a id="routineStillRunningAfterCancel"></a>
 
 上面的示例基本上都展示了 ctx 的各种取消场景.
 
-研究 [Call(ctx context.Context, opt Option)](./example/internal/context/call_test.go) 的源码可以发现它是启动了一个新的 routine.
+研究 [Call(ctx context.Context, opt Option)](./example/internal/context/call_test.go?embed) 的源码可以发现它是启动了一个新的 routine.
 
 在新的routine中执行一些耗时操作,并且必须使用 `select` 去判断哪个通道先返回,不同的通道返回时候的处理方式不同.
 
@@ -131,7 +131,7 @@ case result := <- resultCh:
 
 我们来看下面这段代码,并且运行它:
 
-[代码](./example/internal/context/cancel_test.go)
+[代码](./example/internal/context/cancel_test.go?embed)
 
 > ctx 的取消只是"不管"函数的运行结果,强行认定函数执行"错误",并将错误原因定义为超时.
 > 即使被取消,被调用的函数的其他操作依然会继续运行
@@ -147,7 +147,7 @@ case result := <- resultCh:
 避免 bug 的方法是:使用容量为1的缓冲通道
 我们可通过性能分析去观测内存泄露的代码
 
-[代码](./example/internal/routine_leaks/main.go)
+[代码](./example/internal/routine_leaks/main.go?embed)
 
 
 > 死记硬背 routine 泄露的几种情况是治标不治本,理解泄露的原因就可以通过推论得到答案.
