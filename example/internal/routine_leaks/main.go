@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -24,29 +25,23 @@ func main () {
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*500)
 		defer cancel()
-
-		// 控制超时0.5秒
-		// 而 some() 函数执行需要1秒
-		// 这样 ch <- true 执行时就没有 case <-ch: 去接收通道
-		// 因为已经 return ctx.Err() 退出了
-		// 所以导致了routine 泄露
-		log.Print(sleepOneSecondReturn(ctx))
+		func1(ctx)
 	}
 }
-func sleepOneSecondReturn(ctx context.Context) error {
-	// 将此行修改为 ch := make(chan bool, 1) 即可避免routine泄露
-	// 可以在修改后观察 http://127.0.0.1:6060/debug/pprof/ 页面的数据
-	ch := make(chan bool)
+
+func func1(ctx context.Context) {
+	resp := make(chan int)
 	go func() {
-		time.Sleep(time.Second)
-		ch <- true
-		log.Print("routine return")
-		return
+		time.Sleep(time.Second * 5)     // 模拟处理逻辑
+		resp <- 1
 	}()
+	// 超时机制
 	select {
-	case <-ch:
-		return nil
 	case <-ctx.Done():
-		return ctx.Err()
+		fmt.Println("ctx timeout")
+		fmt.Println(ctx.Err())
+	case <-resp:
+		fmt.Println("done")
 	}
+	return
 }
