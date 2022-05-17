@@ -90,7 +90,7 @@ routine channel 的理解需要大量的实践
 
 ### WithTimeout
 
-调用接口时指定最大运行时,超过时间则返回 err,这样能避免因为某些接口意外的响应慢或者网络抖动导致整个程序"卡死"
+调用接口时指定最大运行时,超过时间则返回 err,这样能避免因为某些接口意外的响应慢或者网络延迟导致整个程序"卡死"
 
 [代码](./example/internal/context/with_timeout_test.go?embed)
 
