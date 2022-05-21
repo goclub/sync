@@ -12,29 +12,29 @@ import (
 func TestSupportCtx(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	data ,err := supportCtx(ctx) ; if err != nil {
-	    xerr.PrintStack(err)
+	data, err := supportCtx(ctx)
+	if err != nil {
+		xerr.PrintStack(err)
 	} else {
 		log.Print(data)
 	}
 }
+
 // 固定2秒后返回字符串(支持 ctx)
 func supportCtx(ctx context.Context) (data string, err error) {
 	dataCh := make(chan string, 1)
-	errCh, err := xsync.Go(func() (err error) {
-		time.Sleep(time.Second*2)
+	errCh := xsync.Go(func() (err error) {
+		time.Sleep(time.Second * 2)
 		dataCh <- "abc"
 		return
-	}) ; if err != nil {
-	    return
-	}
+	})
 	select {
-	case data = <- dataCh:
-	return
+	case data = <-dataCh:
+		return
 	case err = <-errCh:
-	return
-	case <- ctx.Done():
+		return
+	case <-ctx.Done():
 		err = ctx.Err()
-	return
+		return
 	}
 }

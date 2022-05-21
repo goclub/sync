@@ -7,26 +7,27 @@ import (
 	"net/http"
 )
 
-func main () {
+func main() {
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		errCh, err := xsync.Go(func() error {
+		var err error
+		errCh := xsync.Go(func() error {
 			query := request.URL.Query()
 			if query.Get("name") == "nimoc" {
 				panic("name can not be nimoc")
 			}
 			return nil
-		}) ; if err != nil {
-			xerr.PrintStack(err)
-			writer.WriteHeader(500) ; return
-		}
-		err = <- errCh
+		})
+		err = <-errCh
 		if err != nil {
 			xerr.PrintStack(err)
-			writer.WriteHeader(500) ; return
+			writer.WriteHeader(500)
+			return
 		}
-		_, err = writer.Write([]byte("ok")) ; if err != nil {
+		_, err = writer.Write([]byte("ok"))
+		if err != nil {
 			xerr.PrintStack(err)
-			writer.WriteHeader(500); return
+			writer.WriteHeader(500)
+			return
 		}
 	})
 	addr := ":4003"
